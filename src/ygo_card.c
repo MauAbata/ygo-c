@@ -1,5 +1,6 @@
 #include "ygo_card.h"
-#include "string.h"
+#include <string.h>
+#include <stddef.h>
 
 uint32_t _read_int(uint8_t **buf, size_t n) {
     uint32_t ret = 0;
