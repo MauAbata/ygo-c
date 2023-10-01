@@ -44,6 +44,9 @@ int ygo_card_serialize(uint8_t *buffer, const ygo_card_t *card) {
     memcpy(ptr, card->name, YGO_CARD_NAME_MAX_LEN);
     ptr += YGO_CARD_NAME_MAX_LEN;
 
+    // Fill the reserved section
+    memset(ptr, 0xFF, sizeof(card->__reserved));
+
     return 0;
 }
 
