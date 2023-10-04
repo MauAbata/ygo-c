@@ -234,7 +234,7 @@ struct _packed_ ygo_card {
     // 0x0C - Rank of Monster card
     uint8_t rank;
 
-    // 0x0D - Pandulum Scale value for Pendulum Monster
+    // 0x0D - Pendulum Scale value for Pendulum Monster
     uint8_t scale;
 
     // 0x0E - Link Value of the card // unnecessary, can get from adding bits on link marker field.
@@ -250,7 +250,7 @@ struct _packed_ ygo_card {
     char name[YGO_CARD_NAME_MAX_LEN];
 
     // 0x70 - Reserved for future use.
-    uint8_t __reserved[0x20];
+    uint8_t _reserved[0x20];
 };
 
 typedef struct ygo_card ygo_card_t;
