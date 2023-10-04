@@ -3,10 +3,16 @@
 
 #include <stdint.h>
 
+#ifdef __GNUC__
+#define _packed_ __attribute__((__packed__))
+#else
+#define _packed_ /* nothing */
+#endif
+
 /**
  * Generic card type, which is bitmasked from either ygo_card_type or ygo_card_subtype structs.
  */
-enum __attribute__((__packed__)) ygo_card_type_generic {
+enum _packed_ ygo_card_type_generic {
     YGO_CARD_TYPE_MONSTER = 0x01,
     YGO_CARD_TYPE_SPELL = 0x02,
     YGO_CARD_TYPE_TRAP = 0x03,
@@ -32,7 +38,7 @@ typedef enum ygo_card_type_generic ygo_card_type_generic_t;
  * Since there are *so* many monster types, we should actually enumerate
  * Monster/Spell/Trap/Extra/Other. Upper 3 bits = this grouping, lower 3 = monster subtype
  */
-enum __attribute__((__packed__)) ygo_card_type {
+enum _packed_ ygo_card_type {
     // Main Deck Type
     YGO_CARD_TYPE_NORMAL_MONSTER = (YGO_CARD_TYPE_MONSTER << 5),
     YGO_CARD_TYPE_EFFECT_MONSTER,
@@ -77,7 +83,7 @@ typedef enum ygo_card_type ygo_card_type_t;
  * A generic frame / color for the card. This can easily be used to render cards (sans images)
  * dynamically. It is more simple than switching on the card type above.
  */
-enum __attribute__((__packed__)) ygo_card_frame {
+enum _packed_ ygo_card_frame {
     YGO_CARD_FRAME_NORMAL,
     YGO_CARD_FRAME_EFFECT,
     YGO_CARD_FRAME_RITUAL,
@@ -102,7 +108,7 @@ typedef enum ygo_card_frame ygo_card_frame_t;
 /**
  * This is the type of Monster, Trap, or Spell card.
  */
-enum __attribute__((__packed__)) ygo_card_subtype {
+enum _packed_ ygo_card_subtype {
     // Monster Cards
     YGO_CARD_STYPE_MONSTER_AQUA = (YGO_CARD_TYPE_MONSTER << 5),
     YGO_CARD_STYPE_MONSTER_BEAST,
@@ -149,7 +155,7 @@ typedef enum ygo_card_subtype ygo_card_subtype_t;
 /**
  * Card attribute. Nice.
  */
-enum __attribute__((__packed__)) ygo_card_attribute {
+enum _packed_ ygo_card_attribute {
     YGO_CARD_ATTR_DARK,
     YGO_CARD_ATTR_EARTH,
     YGO_CARD_ATTR_FIRE,
@@ -166,7 +172,7 @@ typedef enum ygo_card_attribute ygo_card_attribute_t;
  * Cardinal positions of potential card link markers. These are flags, use bitwise operations and
  * pack into a single byte of data.
  */
-enum __attribute__((__packed__)) ygo_card_link_markers {
+enum _packed_ ygo_card_link_markers {
     YGO_CARD_LINK_TOP = (1 << 0),
     YGO_CARD_LINK_TOP_RIGHT = (1 << 1),
     YGO_CARD_LINK_RIGHT = (1 << 2),
@@ -179,6 +185,11 @@ enum __attribute__((__packed__)) ygo_card_link_markers {
 
 typedef enum ygo_card_link_markers ygo_card_link_markers_t;
 
+// At the time of writing, the longest known Yu-Gi-Oh! card name is:
+//        "Black Luster Soldier - Envoy of the Evening Twilight", 52 characters long (plus
+//        null). Therefore, sizing this to 64 bytes as originally planned might not be enough.
+//        We'll size this field to 96 bytes, and if a card has a name longer than that I
+//        sincerely fear for the printers.
 #define YGO_CARD_NAME_MAX_LEN 0x60
 
 /**
@@ -193,10 +204,12 @@ typedef enum ygo_card_link_markers ygo_card_link_markers_t;
  * can fill an NTAG215 chip, that would require additional programming beyond what is readily
  * available from an API, but allow offline resolution on card tables that support it.
  */
-struct __attribute__((__packed__)) ygo_card {
+struct _packed_ ygo_card {
+    // Page 0x00
     // 0x00 - Card ID or Passcode
     uint32_t id;
 
+    // Page 0x01
     // 0x04 - Main type of card (Normal Monster, Effect Monster, Spell, Trap, etc.)
     ygo_card_type_t type : 8;
 
@@ -210,12 +223,14 @@ struct __attribute__((__packed__)) ygo_card {
     // 0x07 - Attribute of the card (FIRE/WATER/DARK, etc.)
     ygo_card_attribute_t attribute : 8;
 
+    // Page 0x02
     // 0x08 - ATK value of Monster card
     uint16_t atk;
 
     // 0x0A - DEF value of Monster card
     uint16_t def;
 
+    // Page 0x03
     // 0x0C - Rank of Monster card
     uint8_t rank;
 
@@ -228,11 +243,10 @@ struct __attribute__((__packed__)) ygo_card {
     // 0x0F - Link Markers
     ygo_card_link_markers_t link_markers : 8;
 
-    // 0x10 - Card Name -- At the time of writing, the longest known Yu-Gi-Oh! card name is:
-    //        "Black Luster Soldier - Envoy of the Evening Twilight", 52 characters long (plus
-    //        null). Therefore, sizing this to 64 bytes as originally planned might not be enough.
-    //        We'll size this field to 96 bytes, and if a card has a name longer than that I
-    //        sincerely fear for the printers.
+    // Page 0x04
+    // 0x10 - Card Name. Because NTAG devices have 4 byte pages, it would be nice if we can
+    //        align this data neatly to that. This is more of a serializing concern, but this
+    //        struct is generally packed the same way it is serialized.
     char name[YGO_CARD_NAME_MAX_LEN];
 
     // 0x70 - Reserved for future use.
