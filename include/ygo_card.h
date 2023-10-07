@@ -2,12 +2,7 @@
 #define __ygo_card_h
 
 #include <stdint.h>
-
-#ifdef __GNUC__
-#define _packed_ __attribute__((__packed__))
-#else
-#define _packed_ /* nothing */
-#endif
+#include "internals.h"
 
 /**
  * Generic card type, which is bitmasked from either ygo_card_type or ygo_card_subtype structs.
@@ -203,6 +198,8 @@ typedef enum ygo_card_link_markers ygo_card_link_markers_t;
  * This struct is designed to fit within NTAG213 chips, however the extended rule resolution data
  * can fill an NTAG215 chip, that would require additional programming beyond what is readily
  * available from an API, but allow offline resolution on card tables that support it.
+ *
+ * Note that the offset here is no longer tied to the physical data size on the actual chip.
  */
 struct _packed_ ygo_card {
     // Page 0x00
@@ -248,9 +245,6 @@ struct _packed_ ygo_card {
     //        align this data neatly to that. This is more of a serializing concern, but this
     //        struct is generally packed the same way it is serialized.
     char name[YGO_CARD_NAME_MAX_LEN];
-
-    // 0x70 - Reserved for future use.
-    uint8_t _reserved[0x20];
 };
 
 typedef struct ygo_card ygo_card_t;
@@ -261,11 +255,11 @@ typedef struct ygo_card ygo_card_t;
  * Serialize a card data to a buffer. The buffer *must* be large enough to hold the size of the
  * struct.
  */
-int ygo_card_serialize(uint8_t *buffer, const ygo_card_t *card);
+size_t ygo_card_serialize(uint8_t *buffer, const ygo_card_t *card);
 
 /**
  * Deserialize a card buffer into a card object.
  */
-int ygo_card_deserialize(ygo_card_t *card, uint8_t *const buffer);
+size_t ygo_card_deserialize(ygo_card_t *card, const uint8_t *buffer);
 
 #endif
