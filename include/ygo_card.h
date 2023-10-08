@@ -4,19 +4,18 @@
 #include <stdint.h>
 #include "internals.h"
 
+#define YGO_CARD_TYPE_GENERIC_DEFS(X, V) \
+    V(YGO_CARD_TYPE_MONSTER, "Monster", 0x01) \
+    V(YGO_CARD_TYPE_SPELL, "Spell", 0x02) \
+    V(YGO_CARD_TYPE_TRAP, "Trap", 0x03) \
+    V(YGO_CARD_TYPE_EXTRA, "Extra", 0x04) \
+    V(YGO_CARD_TYPE_SKILL, "Skill", 0x05) \
+    V(YGO_CARD_TYPE_TOKEN, "Token", 0x06)
+
 /**
  * Generic card type, which is bitmasked from either ygo_card_type or ygo_card_subtype structs.
  */
-enum _packed_ ygo_card_type_generic {
-    YGO_CARD_TYPE_MONSTER = 0x01,
-    YGO_CARD_TYPE_SPELL = 0x02,
-    YGO_CARD_TYPE_TRAP = 0x03,
-    YGO_CARD_TYPE_EXTRA = 0x04,
-    YGO_CARD_TYPE_SKILL = 0x05,
-    YGO_CARD_TYPE_TOKEN = 0x06,
-};
-
-typedef enum ygo_card_type_generic ygo_card_type_generic_t;
+ENUM_DECL(ygo_card_type_generic, YGO_CARD_TYPE_GENERIC_DEFS);
 
 // This bitmask is used in ygo_card_type and ygo_card_subtype to identify the overall generic type
 // of the card.
@@ -24,6 +23,45 @@ typedef enum ygo_card_type_generic ygo_card_type_generic_t;
 
 // Infers a generic type from the more detailed ygo_card_type and ygo_card_subtype values.
 #define get_generic_type(type) ((d & YGO_CARD_TYPE_GROUP_BITS) >> 5)
+
+// This is madness and would absolutely be better expressed as a bitfield.
+#define YGO_CARD_TYPE_DEFS(X, V) \
+    /* Main Deck Type */\
+    V(YGO_CARD_TYPE_NORMAL_MONSTER, "Normal Monster", YGO_CARD_TYPE_MONSTER << 5u) \
+    X(YGO_CARD_TYPE_EFFECT_MONSTER, "Effect Monster") \
+    X(YGO_CARD_TYPE_FLIP_EFFECT_MONSTER, "Flip Effect Monster") \
+    X(YGO_CARD_TYPE_FLIP_TUNER_EFFECT_MONSTER, "Flip Tuner Effect Monster") \
+    X(YGO_CARD_TYPE_GEMINI_MONSTER, "Gemini Monster") \
+    X(YGO_CARD_TYPE_NORMAL_TUNER_MONSTER, "Normal Tuner Monster") \
+    X(YGO_CARD_TYPE_PENDULUM_EFFECT_MONSTER, "Pendulum Effect Monster") \
+    X(YGO_CARD_TYPE_PENDULUM_EFFECT_RITUAL_MONSTER, "Pendulum Effect Ritual Monster") \
+    X(YGO_CARD_TYPE_PENDULUM_FLIP_EFFECT_MONSTER, "Pendulum Flip Effect Monster") \
+    X(YGO_CARD_TYPE_PENDULUM_NORMAL_MONSTER, "Pendulum Normal Monster") \
+    X(YGO_CARD_TYPE_PENDULUM_TUNER_EFFECT_MONSTER, "Pendulum Tuner Effect Monster") \
+    X(YGO_CARD_TYPE_RITUAL_EFFECT_MONSTER, "Ritual Effect Monster") \
+    X(YGO_CARD_TYPE_RITUAL_MONSTER, "Ritual Monster") \
+    X(YGO_CARD_TYPE_SPIRIT_MONSTER, "Spirit Monster") \
+    X(YGO_CARD_TYPE_TOON_MONSTER, "Toon Monster") \
+    X(YGO_CARD_TYPE_TUNER_MONSTER, "Tuner Monster") \
+    X(YGO_CARD_TYPE_UNION_EFFECT_MONSTER, "Union Effect Monster") \
+    \
+    /* Non-Monster Main */\
+    V(YGO_CARD_TYPE_SPELL_CARD, "Spell Card", YGO_CARD_TYPE_SPELL << 5u) \
+    V(YGO_CARD_TYPE_TRAP_CARD, "Trap Card",  YGO_CARD_TYPE_TRAP << 5u) \
+    \
+    /* Extra Deck Types */\
+    V(YGO_CARD_TYPE_FUSION_MONSTER, "Fusion Monster", YGO_CARD_TYPE_EXTRA << 5u) \
+    X(YGO_CARD_TYPE_LINK_MONSTER, "Link Monster") \
+    X(YGO_CARD_TYPE_PENDULUM_EFFECT_FUSION_MONSTER, "Pendulum Effect Fusion Monster") \
+    X(YGO_CARD_TYPE_SYNCHRO_MONSTER, "Synchro Monster") \
+    X(YGO_CARD_TYPE_SYNCHRO_PENDULUM_EFFECT_MONSTER, "Synchro Pendulum Effect Monster") \
+    X(YGO_CARD_TYPE_SYNCHRO_TUNER_MONSTER, "Synchro Tuner Monster") \
+    X(YGO_CARD_TYPE_XYZ_MONSTER, "XYZ Monster") \
+    X(YGO_CARD_TYPE_XYZ_PENDULUM_EFFECT_MONSTER, "XYZ Pendulum Effect Monster") \
+    \
+    /* Other Types */\
+    V(YGO_CARD_TYPE_SKILL_CARD, "Skill Card", YGO_CARD_TYPE_SKILL << 5u) \
+    V(YGO_CARD_TYPE_TOKEN_CARD, "Token Card", YGO_CARD_TYPE_TOKEN << 5u) \
 
 /**
  * Main type of card (Monster, Effect, Etc.)
@@ -33,152 +71,111 @@ typedef enum ygo_card_type_generic ygo_card_type_generic_t;
  * Since there are *so* many monster types, we should actually enumerate
  * Monster/Spell/Trap/Extra/Other. Upper 3 bits = this grouping, lower 3 = monster subtype
  */
-enum _packed_ ygo_card_type {
-    // Main Deck Type
-    YGO_CARD_TYPE_NORMAL_MONSTER = (YGO_CARD_TYPE_MONSTER << 5),
-    YGO_CARD_TYPE_EFFECT_MONSTER,
-    YGO_CARD_TYPE_FLIP_EFFECT_MONSTER,
-    YGO_CARD_TYPE_FLIP_TUNER_EFFECT_MONSTER,
-    YGO_CARD_TYPE_GEMINI_MONSTER,
-    YGO_CARD_TYPE_NORMAL_TUNER_MONSTER,
-    YGO_CARD_TYPE_PENDULUM_EFFECT_MONSTER,
-    YGO_CARD_TYPE_PENDULUM_EFFECT_RITUAL_MONSTER,
-    YGO_CARD_TYPE_PENDULUM_FLIP_EFFECT_MONSTER,
-    YGO_CARD_TYPE_PENDULUM_NORMAL_MONSTER,
-    YGO_CARD_TYPE_PENDULUM_TUNER_EFFECT_MONSTER,
-    YGO_CARD_TYPE_RITUAL_EFFECT_MONSTER,
-    YGO_CARD_TYPE_RITUAL_MONSTER,
-    YGO_CARD_TYPE_SPIRIT_MONSTER,
-    YGO_CARD_TYPE_TOON_MONSTER,
-    YGO_CARD_TYPE_TUNER_MONSTER,
-    YGO_CARD_TYPE_UNION_EFFECT_MONSTER,
+ENUM_DECL(ygo_card_type, YGO_CARD_TYPE_DEFS);
 
-    // Non-Monster Main
-    YGO_CARD_TYPE_SPELL_CARD = (YGO_CARD_TYPE_SPELL << 5),
-    YGO_CARD_TYPE_TRAP_CARD = (YGO_CARD_TYPE_TRAP << 5),
-
-    // Extra Deck Types
-    YGO_CARD_TYPE_FUSION_MONSTER = (YGO_CARD_TYPE_EXTRA << 5),
-    YGO_CARD_TYPE_LINK_MONSTER,
-    YGO_CARD_TYPE_PENDULUM_EFFECT_FUSION_MONSTER,
-    YGO_CARD_TYPE_SYNCHRO_MONSTER,
-    YGO_CARD_TYPE_SYNCHRO_PENDULUM_EFFECT_MONSTER,
-    YGO_CARD_TYPE_SYNCHRO_TUNER_MONSTER,
-    YGO_CARD_TYPE_XYZ_MONSTER,
-    YGO_CARD_TYPE_XYZ_PENDULUM_EFFECT_MONSTER,
-
-    // Other Types
-    YGO_CARD_TYPE_SKILL_CARD = (YGO_CARD_TYPE_SKILL << 5),
-    YGO_CARD_TYPE_TOKEN_CARD = (YGO_CARD_TYPE_TOKEN << 5),
-};
-
-typedef enum ygo_card_type ygo_card_type_t;
+#define YGO_CARD_FRAME_DEFS(X, V) \
+    X(YGO_CARD_FRAME_NORMAL, "Normal") \
+    X(YGO_CARD_FRAME_EFFECT, "Effect") \
+    X(YGO_CARD_FRAME_RITUAL, "Ritual") \
+    X(YGO_CARD_FRAME_FUSION, "Fusion") \
+    X(YGO_CARD_FRAME_SYNCHRO, "Synchro") \
+    X(YGO_CARD_FRAME_XYZ, "Xyz") \
+    X(YGO_CARD_FRAME_LINK, "Link") \
+    X(YGO_CARD_FRAME_NORMAL_PENDULUM, "Normal Pendulum") \
+    X(YGO_CARD_FRAME_EFFECT_PENDULUM, "Effect Pendulum") \
+    X(YGO_CARD_FRAME_RITUAL_PENDULUM, "Ritual Pendulum") \
+    X(YGO_CARD_FRAME_FUSION_PENDULUM, "Fusion Pendulum") \
+    X(YGO_CARD_FRAME_SYNCHRO_PENDULUM, "Synchro Pendulum") \
+    X(YGO_CARD_FRAME_XYZ_PENDULUM, "Xyz Pendulum") \
+    X(YGO_CARD_FRAME_SPELL, "Spell") \
+    X(YGO_CARD_FRAME_TRAP, "Trap") \
+    X(YGO_CARD_FRAME_TOKEN, "Token") \
+    X(YGO_CARD_FRAME_SKILL, "Skill") \
 
 /**
  * A generic frame / color for the card. This can easily be used to render cards (sans images)
  * dynamically. It is more simple than switching on the card type above.
  */
-enum _packed_ ygo_card_frame {
-    YGO_CARD_FRAME_NORMAL,
-    YGO_CARD_FRAME_EFFECT,
-    YGO_CARD_FRAME_RITUAL,
-    YGO_CARD_FRAME_FUSION,
-    YGO_CARD_FRAME_SYNCHRO,
-    YGO_CARD_FRAME_XYZ,
-    YGO_CARD_FRAME_LINK,
-    YGO_CARD_FRAME_NORMAL_PENDULUM,
-    YGO_CARD_FRAME_EFFECT_PENDULUM,
-    YGO_CARD_FRAME_RITUAL_PENDULUM,
-    YGO_CARD_FRAME_FUSION_PENDULUM,
-    YGO_CARD_FRAME_SYNCHRO_PENDULUM,
-    YGO_CARD_FRAME_XYZ_PENDULUM,
-    YGO_CARD_FRAME_SPELL,
-    YGO_CARD_FRAME_TRAP,
-    YGO_CARD_FRAME_TOKEN,
-    YGO_CARD_FRAME_SKILL,
-};
+ENUM_DECL(ygo_card_frame, YGO_CARD_FRAME_DEFS);
 
-typedef enum ygo_card_frame ygo_card_frame_t;
+#define YGO_CARD_SUBTYPE_DEFS(X, V) \
+    /* Monster Cards */\
+    V(YGO_CARD_STYPE_MONSTER_AQUA, "Aqua", YGO_CARD_TYPE_MONSTER << 5u) \
+    X(YGO_CARD_STYPE_MONSTER_BEAST, "Beast") \
+    X(YGO_CARD_STYPE_MONSTER_BEAST_WARRIOR, "Beast Warrior") \
+    X(YGO_CARD_STYPE_MONSTER_CREATOR_GOD, "Creator God") \
+    X(YGO_CARD_STYPE_MONSTER_CYBERSE, "Cyberse") \
+    X(YGO_CARD_STYPE_MONSTER_DINOSAUR, "Dinosaur") \
+    X(YGO_CARD_STYPE_MONSTER_DIVINE_BEAST, "Divine Beast") \
+    X(YGO_CARD_STYPE_MONSTER_DRAGON, "Dragon") \
+    X(YGO_CARD_STYPE_MONSTER_FAIRY, "Fairy") \
+    X(YGO_CARD_STYPE_MONSTER_FIEND, "Fiend") \
+    X(YGO_CARD_STYPE_MONSTER_FISH, "Fish") \
+    X(YGO_CARD_STYPE_MONSTER_INSECT, "Insect") \
+    X(YGO_CARD_STYPE_MONSTER_MACHINE, "Machine") \
+    X(YGO_CARD_STYPE_MONSTER_PLANT, "Plant") \
+    X(YGO_CARD_STYPE_MONSTER_PSYCHIC, "Psychic") \
+    X(YGO_CARD_STYPE_MONSTER_PYRO, "Pyro") \
+    X(YGO_CARD_STYPE_MONSTER_REPTILE, "Reptile") \
+    X(YGO_CARD_STYPE_MONSTER_ROCK, "Rock") \
+    X(YGO_CARD_STYPE_MONSTER_SEA_SERPENT, "Sea Serpent") \
+    X(YGO_CARD_STYPE_MONSTER_SPELLCASTER, "Spellcaster") \
+    X(YGO_CARD_STYPE_MONSTER_THUNDER, "Thunder") \
+    X(YGO_CARD_STYPE_MONSTER_WARRIOR, "Warrior") \
+    X(YGO_CARD_STYPE_MONSTER_WINGED_BEAST, "Winged Beast") \
+    X(YGO_CARD_STYPE_MONSTER_WYRM, "Wyrm") \
+    X(YGO_CARD_STYPE_MONSTER_ZOMBIE, "Zombie") \
+    \
+    /* Spell Cards */\
+    V(YGO_CARD_STYPE_SPELL_NORMAL, "Normal", YGO_CARD_TYPE_SPELL << 5u) \
+    X(YGO_CARD_STYPE_SPELL_FIELD, "Field") \
+    X(YGO_CARD_STYPE_SPELL_EQUIP, "Equip") \
+    X(YGO_CARD_STYPE_SPELL_CONTINUOUS, "Continuous") \
+    X(YGO_CARD_STYPE_SPELL_QUICK_PLAY, "Quick Play") \
+    X(YGO_CARD_STYPE_SPELL_RITUAL, "Ritual") \
+    \
+    /* Trap Cards */\
+    V(YGO_CARD_STYPE_TRAP_NORMAL, "Normal", YGO_CARD_TYPE_TRAP << 5u) \
+    X(YGO_CARD_STYPE_TRAP_CONTINUOUS, "Continuous") \
+    X(YGO_CARD_STYPE_TRAP_COUNTER, "Counter") \
 
 /**
- * This is the type of Monster, Trap, or Spell card.
+ * This is the type of Monster, Trap, or Spell card. WIth regards to the string representations:
+ * They shouldn't be here. There should be a union on the main type for this field, and different
+ * Enum values.
  */
-enum _packed_ ygo_card_subtype {
-    // Monster Cards
-    YGO_CARD_STYPE_MONSTER_AQUA = (YGO_CARD_TYPE_MONSTER << 5),
-    YGO_CARD_STYPE_MONSTER_BEAST,
-    YGO_CARD_STYPE_MONSTER_BEAST_WARRIOR,
-    YGO_CARD_STYPE_MONSTER_CREATOR_GOD,
-    YGO_CARD_STYPE_MONSTER_CYBERSE,
-    YGO_CARD_STYPE_MONSTER_DINOSAUR,
-    YGO_CARD_STYPE_MONSTER_DIVINE_BEAST,
-    YGO_CARD_STYPE_MONSTER_DRAGON,
-    YGO_CARD_STYPE_MONSTER_FAIRY,
-    YGO_CARD_STYPE_MONSTER_FIEND,
-    YGO_CARD_STYPE_MONSTER_FISH,
-    YGO_CARD_STYPE_MONSTER_INSECT,
-    YGO_CARD_STYPE_MONSTER_MACHINE,
-    YGO_CARD_STYPE_MONSTER_PLANT,
-    YGO_CARD_STYPE_MONSTER_PSYCHIC,
-    YGO_CARD_STYPE_MONSTER_PYRO,
-    YGO_CARD_STYPE_MONSTER_REPTILE,
-    YGO_CARD_STYPE_MONSTER_ROCK,
-    YGO_CARD_STYPE_MONSTER_SEA_SERPENT,
-    YGO_CARD_STYPE_MONSTER_SPELLCASTER,
-    YGO_CARD_STYPE_MONSTER_THUNDER,
-    YGO_CARD_STYPE_MONSTER_WARRIOR,
-    YGO_CARD_STYPE_MONSTER_WINGED_BEAST,
-    YGO_CARD_STYPE_MONSTER_WYRM,
-    YGO_CARD_STYPE_MONSTER_ZOMBIE,
+ENUM_DECL(ygo_card_subtype, YGO_CARD_SUBTYPE_DEFS);
 
-    // Spell Cards
-    YGO_CARD_STYPE_SPELL_NORMAL = (YGO_CARD_TYPE_SPELL << 5),
-    YGO_CARD_STYPE_SPELL_FIELD,
-    YGO_CARD_STYPE_SPELL_EQUIP,
-    YGO_CARD_STYPE_SPELL_CONTINUOUS,
-    YGO_CARD_STYPE_SPELL_QUICK_PLAY,
-    YGO_CARD_STYPE_SPELL_RITUAL,
-
-    // Trap Cards
-    YGO_CARD_STYPE_TRAP_NORMAL = (YGO_CARD_TYPE_TRAP << 5),
-    YGO_CARD_STYPE_TRAP_CONTINUOUS,
-    YGO_CARD_STYPE_TRAP_COUNTER,
-};
-
-typedef enum ygo_card_subtype ygo_card_subtype_t;
+#define YGO_CARD_ATTRIBUTE_DEFS(X, V) \
+    X(YGO_CARD_ATTR_DARK, "DARK") \
+    X(YGO_CARD_ATTR_EARTH, "EARTH") \
+    X(YGO_CARD_ATTR_FIRE, "FIRE") \
+    X(YGO_CARD_ATTR_LIGHT, "LIGHT") \
+    X(YGO_CARD_ATTR_WATER, "WATER") \
+    X(YGO_CARD_ATTR_WIND, "WIND") \
+    X(YGO_CARD_ATTR_DIVINE, "DIVINE") \
+    X(YGO_CARD_ATTR_TIME, "TIME") \
 
 /**
  * Card attribute. Nice.
  */
-enum _packed_ ygo_card_attribute {
-    YGO_CARD_ATTR_DARK,
-    YGO_CARD_ATTR_EARTH,
-    YGO_CARD_ATTR_FIRE,
-    YGO_CARD_ATTR_LIGHT,
-    YGO_CARD_ATTR_WATER,
-    YGO_CARD_ATTR_WIND,
-    YGO_CARD_ATTR_DIVINE,
-    YGO_CARD_ATTR_TIME,
-};
+ENUM_DECL(ygo_card_attribute, YGO_CARD_ATTRIBUTE_DEFS);
 
-typedef enum ygo_card_attribute ygo_card_attribute_t;
+#define YGO_CARD_LINK_MARKERS_DEFS(B) \
+    B(YGO_CARD_LINK_TOP, "Top", 0u) \
+    B(YGO_CARD_LINK_TOP_RIGHT, "Top Right", 1u) \
+    B(YGO_CARD_LINK_RIGHT, "Right", 2u) \
+    B(YGO_CARD_LINK_BOTTOM_RIGHT, "Bottom Right", 3u) \
+    B(YGO_CARD_LINK_BOTTOM, "Bottom", 4u) \
+    B(YGO_CARD_LINK_BOTTOM_LEFT, "Bottom Left", 5u) \
+    B(YGO_CARD_LINK_LEFT, "Left", 6u) \
+    B(YGO_CARD_LINK_TOP_LEFT, "Top Left", 7u) \
 
 /**
  * Cardinal positions of potential card link markers. These are flags, use bitwise operations and
  * pack into a single byte of data.
  */
-enum _packed_ ygo_card_link_markers {
-    YGO_CARD_LINK_TOP = (1 << 0),
-    YGO_CARD_LINK_TOP_RIGHT = (1 << 1),
-    YGO_CARD_LINK_RIGHT = (1 << 2),
-    YGO_CARD_LINK_BOTTOM_RIGHT = (1 << 3),
-    YGO_CARD_LINK_BOTTOM = (1 << 4),
-    YGO_CARD_LINK_BOTTOM_LEFT = (1 << 5),
-    YGO_CARD_LINK_LEFT = (1 << 6),
-    YGO_CARD_LINK_TOP_LEFT = (1 << 7),
-};
-
-typedef enum ygo_card_link_markers ygo_card_link_markers_t;
+ENUM_DECL_BITS(ygo_card_link_markers, YGO_CARD_LINK_MARKERS_DEFS);
 
 // At the time of writing, the longest known Yu-Gi-Oh! card name is:
 //        "Black Luster Soldier - Envoy of the Evening Twilight", 52 characters long (plus
@@ -208,17 +205,17 @@ struct _packed_ ygo_card {
 
     // Page 0x01
     // 0x04 - Main type of card (Normal Monster, Effect Monster, Spell, Trap, etc.)
-    ygo_card_type_t type : 8;
+    ygo_card_type_t type;
 
     // 0x05 - Frame / Color (normal, effect, synchro, spell, trap, etc.)
-    ygo_card_frame_t frame : 8;
+    ygo_card_frame_t frame;
 
     // 0x06 - Subtype of card (Spellcaster, Warrior, etc. for Monsters; Field, Equip, Counter, etc.
     // for Trap/Spell)
-    ygo_card_subtype_t subtype : 8;
+    ygo_card_subtype_t subtype;
 
     // 0x07 - Attribute of the card (FIRE/WATER/DARK, etc.)
-    ygo_card_attribute_t attribute : 8;
+    ygo_card_attribute_t attribute;
 
     // Page 0x02
     // 0x08 - ATK value of Monster card
@@ -238,7 +235,7 @@ struct _packed_ ygo_card {
     uint8_t link_value;
 
     // 0x0F - Link Markers
-    ygo_card_link_markers_t link_markers : 8;
+    ygo_card_link_markers_t link_markers;
 
     // Page 0x04
     // 0x10 - Card Name. Because NTAG devices have 4 byte pages, it would be nice if we can
@@ -261,5 +258,7 @@ size_t ygo_card_serialize(uint8_t *buffer, const ygo_card_t *card);
  * Deserialize a card buffer into a card object.
  */
 size_t ygo_card_deserialize(ygo_card_t *card, const uint8_t *buffer);
+
+void ygo_card_print(ygo_card_t *card);
 
 #endif

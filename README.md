@@ -18,3 +18,19 @@ card_data_t favorite_card = {
     .attribute = CARD_ATTR_DARK,
 };
 ```
+
+Monster types are wild. I'm gonna try and list everything:
+ 001        010    011    100     101     110      111
+MONSTER | SPELL | TRAP | SKILL | TOKEN | GEMINI | SPIRIT
+EFFECT
+FLIP
+TUNER
+GEMINI
+PENDULUM
+RITUAL
+SPIRIT
+TOON
+UNION
+LINK
+SYNCHRO
+XYZ

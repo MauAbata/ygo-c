@@ -67,7 +67,7 @@ typedef struct {
     size_t ptr;
     size_t header_start;
     ygo_bin_record_header_t *header;
-    ygo_bin_errno_t errno;
+    ygo_bin_errno_t err;
 } ygo_bin_read_context_t;
 
 void ygo_bin_begin_data_write(ygo_bin_write_context_t *ctx, uint8_t *buffer);
