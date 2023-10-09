@@ -2,6 +2,7 @@
 #define __ygo_card_h
 
 #include <stdint.h>
+#include <assert.h>
 #include "internals.h"
 
 #define YGO_CARD_TYPE_DEFS(X, V) \
@@ -38,7 +39,6 @@ ENUM_DECL(ygo_card_type, YGO_CARD_TYPE_DEFS);
  * checking monster type via bitwise-and.
  */
 ENUM_DECL_BITS(ygo_monster_flag, YGO_MONSTER_FLAG_DEFS);
-
 static_assert(YGO_MONSTER_FLAG_EFFECT == 0b00100000u, "YGO_MONSTER_FLAG_EFFECT value incorrect!");
 
 #define GET_MONSTER_FLAG(ctype1) ((ygo_monster_flag_t)(ctype1 & 0x38u))
