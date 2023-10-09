@@ -1,0 +1,50 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.3
+        with:
+          submodules: recursive
+
+      - name: Remove Strawberry - Windows
+        if: matrix.os == 'windows-latest'
+        run: rmdir /s /q C:\Strawberry
+        shell: cmd
+
+      - name: Run CMake - Windows
+        if: matrix.os == 'windows-latest'
+        uses: threeal/cmake-action@v1.3.0
+        with:
+          generator: Visual Studio 17 2022
+          run-build: true
+
+      - name: Run CMake - Unix
+        if: matrix.os != 'windows-latest'
+        uses: threeal/cmake-action@v1.3.0
+        env:
+          LIBRARY_PATH: /usr/local/lib
+          LD_LIBRARY_PATH: /usr/local/lib
+        with:
+          run-build: true
+
+      - name: Test the project
+        run: ctest --test-dir build
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.os }}
+          path: build
