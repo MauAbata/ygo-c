@@ -9,6 +9,8 @@ extern "C" {
 #define _packed_ __attribute__((__packed__))
 #else
 #define _packed_ /* nothing */
+#define strtok_r strtok_s
+#define strlcpy(dest, src, size) strcpy_s(dest, size, src)
 #endif
 
 #include <string.h>
@@ -32,6 +34,7 @@ extern enum debug_level DEBUG_LEVEL;
 #define ENUM_DECL(name, DEFS) \
     enum _packed_ name { \
         DEFS(ENUM_DEFS, ENUM_DEFS_VAL) \
+        _ ## name ## _invalid = 0xFF, \
     }; \
     typedef enum name name ## _t; \
     /** \
@@ -59,26 +62,26 @@ extern enum debug_level DEBUG_LEVEL;
 
 #define ENUM_IMPL(name, DEFS) \
     name ## _t name ##_from_str(const char *str) { \
-        DEFS(ENUM_PARSE, ENUM_PARSE); \
+        DEFS(ENUM_PARSE, ENUM_PARSE) \
         LOGD("Could not determine " #name " from string: \"%s\"\n", str); \
-        return -1; \
+        return _ ## name ## _invalid; \
     } \
-    const char *name ## _to_str(name ## _t val) { \
+    const char (* name ## _to_str(name ## _t val)) { \
         switch (val) { \
-            DEFS(ENUM_CASE, ENUM_CASE); \
+            DEFS(ENUM_CASE, ENUM_CASE) \
             default: return "???"; \
         } \
     } \
 
 #define ENUM_IMPL_BITS(name, DEFS) \
     name ## _t name ##_from_str(const char *str) { \
-        DEFS(ENUM_PARSE); \
+        DEFS(ENUM_PARSE) \
         LOGD("Could not determine " #name " from string: \"%s\"\n", str); \
         return -1; \
     } \
-    const char *name ## _to_str(name ## _t val) { \
+    const char (* name ## _to_str(name ## _t val)) { \
         switch (val) { \
-            DEFS(ENUM_CASE); \
+            DEFS(ENUM_CASE) \
             default: return "???"; \
         } \
     } \

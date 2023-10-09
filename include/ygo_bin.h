@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
+#include "../src/internals.h"
 #include <stdint.h>
-#include "internals.h"
 
 #define YGO_CARD_DATA_MAGIC_WORD { '\x0E', 'Y', 'G', 'O' }
 #define YGO_CARD_DATA_VERSION 0x00

@@ -1,9 +1,9 @@
 #ifndef __ygo_card_h
 #define __ygo_card_h
 
-#include <stdint.h>
+#include "../src/internals.h"
 #include <assert.h>
-#include "internals.h"
+#include <stdint.h>
 
 #define YGO_CARD_TYPE_DEFS(X, V) \
     V(YGO_CARD_TYPE_TOKEN, "Token", 0x00u) \
