@@ -13,7 +13,14 @@ extern "C" {
 
 #include <string.h>
 
-#define LOGD(...) printf("DEBUG: " __VA_ARGS__)
+enum debug_level {
+    DEBUG_OFF,
+    DEBUG_ON
+};
+
+extern enum debug_level DEBUG_LEVEL;
+
+#define LOGD(...) if (DEBUG_LEVEL == DEBUG_ON) printf("DEBUG: " __VA_ARGS__)
 
 #define ENUM_DEFS(id, name) id ,
 #define ENUM_DEFS_VAL(id, name, value) id = ((unsigned) value ) ,

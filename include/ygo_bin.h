@@ -26,6 +26,9 @@ typedef enum ygo_bin_errno ygo_bin_errno_t;
  */
 enum ygo_bin_record_type {
     BIN_RECORD_CARD_BASIC = 0x00,
+    BIN_RECORD_CARD_DESCRIPTION = 0x01,
+    BIN_RECORD_CARD_RULE_INDEX = 0x02,
+    BIN_RECORD_CARD_IMAGE_CROPPED = 0x03,
 };
 
 typedef enum ygo_bin_record_type ygo_bin_record_type_t;
