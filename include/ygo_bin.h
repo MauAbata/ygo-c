@@ -30,6 +30,7 @@ enum ygo_bin_record_type {
     BIN_RECORD_CARD_DESCRIPTION = 0x01,
     BIN_RECORD_CARD_RULE_INDEX = 0x02,
     BIN_RECORD_CARD_IMAGE_CROPPED = 0x03,
+    BIN_RECORD_CARD_SIGNATURE = 0x10, // Ed25519 signature for certification
 };
 
 typedef enum ygo_bin_record_type ygo_bin_record_type_t;
@@ -122,6 +123,8 @@ void ygo_bin_write_str(ygo_bin_write_context_t *ctx, const char *str, size_t len
  * @return YGO_BIN_OK on success
  */
 ygo_bin_errno_t ygo_bin_read_str(ygo_bin_read_context_t *ctx, char *str, size_t len);
+
+uint16_t ygo_bin_calculate_crc(const uint8_t *buffer, size_t size);
 
 #ifdef __cplusplus
 }
