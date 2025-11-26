@@ -8,7 +8,8 @@ extern "C" {
 #include "../src/internals.h"
 #include <stdint.h>
 
-#define YGO_CARD_DATA_MAGIC_WORD { '\x0E', 'Y', 'G', 'O' }
+#define YGO_CARD_DATA_MAGIC_WORD                                                                   \
+    { '\x0E', 'Y', 'G', 'O' }
 #define YGO_CARD_DATA_VERSION 0x00
 
 enum ygo_bin_errno {
@@ -83,22 +84,22 @@ ygo_bin_errno_t ygo_bin_check_magic_word(ygo_bin_read_context_t *ctx);
 
 void ygo_bin_write_record_header(ygo_bin_write_context_t *ctx, ygo_bin_record_header_t *header);
 
-ygo_bin_errno_t ygo_bin_read_record_header(ygo_bin_read_context_t *ctx, ygo_bin_record_header_t *header);
+ygo_bin_errno_t ygo_bin_read_record_header(ygo_bin_read_context_t *ctx,
+                                           ygo_bin_record_header_t *header);
 
 void ygo_bin_write_record_end(ygo_bin_write_context_t *ctx);
 
 ygo_bin_errno_t ygo_bin_check_record_end(ygo_bin_read_context_t *ctx);
 
-void ygo_bin_write_int(ygo_bin_write_context_t *ctx, uint32_t value, size_t n);
-
-// TODO: This should actually be a pointer, so we can check errno on return. Context also holds
-//       errno in an attempt to allow this bad type conversion to continue, but that makes checking
-//       more complicated. Boo.
-ygo_bin_errno_t ygo_bin_read_int(ygo_bin_read_context_t *ctx, uintmax_t *dest, size_t n);
+// Optimized read/write functions for 8-bit systems
 ygo_bin_errno_t ygo_bin_read_enum(ygo_bin_read_context_t *ctx, int *dest, size_t n);
 ygo_bin_errno_t ygo_bin_read_int8(ygo_bin_read_context_t *ctx, uint8_t *dest);
 ygo_bin_errno_t ygo_bin_read_int16(ygo_bin_read_context_t *ctx, uint16_t *dest);
 ygo_bin_errno_t ygo_bin_read_int32(ygo_bin_read_context_t *ctx, uint32_t *dest);
+
+void ygo_bin_write_int8(ygo_bin_write_context_t *ctx, uint8_t value);
+void ygo_bin_write_int16(ygo_bin_write_context_t *ctx, uint16_t value);
+void ygo_bin_write_int32(ygo_bin_write_context_t *ctx, uint32_t value);
 
 void ygo_bin_write_bytes(ygo_bin_write_context_t *ctx, const uint8_t *data, size_t n);
 
@@ -113,9 +114,14 @@ void ygo_bin_write_bytes(ygo_bin_write_context_t *ctx, const uint8_t *data, size
  */
 void ygo_bin_write_str(ygo_bin_write_context_t *ctx, const char *str, size_t len);
 
-ygo_bin_errno_t ygo_bin_read_str(ygo_bin_read_context_t *ctx, const char *str, size_t len);
-
-
+/**
+ * This reads a string from the packed buffer. Length is provided to read that many bytes.
+ * @param ctx Read context
+ * @param str Destination buffer
+ * @param len Number of bytes to read
+ * @return YGO_BIN_OK on success
+ */
+ygo_bin_errno_t ygo_bin_read_str(ygo_bin_read_context_t *ctx, char *str, size_t len);
 
 #ifdef __cplusplus
 }

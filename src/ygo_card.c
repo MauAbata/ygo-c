@@ -28,29 +28,25 @@ size_t ygo_card_serialize(uint8_t *buffer, const ygo_card_t *card) {
     ygo_bin_write_record_header(&ctx, &header);
 
     // Write Card Data
-    ygo_bin_write_int(&ctx, card->id, 4);
+    ygo_bin_write_int32(&ctx, card->id);
 
-    uint8_t type1 = (
-        ((unsigned) card->type) | ((unsigned) card->flags) | ((unsigned) card->ability)
-    );
+    uint8_t type1 = (((unsigned)card->type) | ((unsigned)card->flags) | ((unsigned)card->ability));
 
-    ygo_bin_write_int(&ctx, type1, 1);
+    ygo_bin_write_int8(&ctx, type1);
 
-    uint8_t type0 = (
-        ((unsigned) card->summon) | ((unsigned) card->monster_type)
-    );
+    uint8_t type0 = (((unsigned)card->summon) | ((unsigned)card->monster_type));
 
-    ygo_bin_write_int(&ctx, type0, 1);
+    ygo_bin_write_int8(&ctx, type0);
 
     // Unused, to align Attribute Start
-    ygo_bin_write_int(&ctx, 0x0000, 2);
+    ygo_bin_write_int16(&ctx, 0x0000);
 
-    ygo_bin_write_int(&ctx, card->atk, 2);
-    ygo_bin_write_int(&ctx, card->def, 2);
-    ygo_bin_write_int(&ctx, card->level, 1);
-    ygo_bin_write_int(&ctx, card->attribute, 1);
-    ygo_bin_write_int(&ctx, card->scale, 1);
-    ygo_bin_write_int(&ctx, card->link_markers, 1);
+    ygo_bin_write_int16(&ctx, card->atk);
+    ygo_bin_write_int16(&ctx, card->def);
+    ygo_bin_write_int8(&ctx, card->level);
+    ygo_bin_write_int8(&ctx, card->attribute);
+    ygo_bin_write_int8(&ctx, card->scale);
+    ygo_bin_write_int8(&ctx, card->link_markers);
 
     ygo_bin_write_str(&ctx, card->name, YGO_CARD_NAME_MAX_LEN);
 
@@ -79,7 +75,6 @@ size_t ygo_card_deserialize(ygo_card_t *card, const uint8_t *buffer) {
     card->summon = GET_SUMMON_TYPE(type0);
     card->monster_type = GET_MONSTER_TYPE(type0);
 
-
     ygo_bin_read_enum(&ctx, &card->attribute, 1);
     ygo_bin_read_int16(&ctx, &card->atk);
     ygo_bin_read_int16(&ctx, &card->def);
@@ -87,9 +82,9 @@ size_t ygo_card_deserialize(ygo_card_t *card, const uint8_t *buffer) {
     ygo_bin_read_int8(&ctx, &card->scale);
     ygo_bin_read_int8(&ctx, &card->link_value);
     ygo_bin_read_enum(&ctx, &card->link_markers, 1);
-//    ygo_bin_read_str(&ctx, card->name, YGO_CARD_NAME_MAX_LEN);
+    ygo_bin_read_str(&ctx, card->name, YGO_CARD_NAME_MAX_LEN);
 
-//    ygo_bin_check_record_end(&ctx);
+    ygo_bin_check_record_end(&ctx);
     return ctx.ptr;
 }
 
@@ -101,8 +96,7 @@ void ygo_card_print(ygo_card_t *card) {
         printf("Type: 0x%x%x - %s ",
                (unsigned)card->type | (unsigned)card->flags | (unsigned)card->ability,
                (unsigned)card->summon | (unsigned)card->monster_type,
-               ygo_monster_type_to_str(card->monster_type)
-        );
+               ygo_monster_type_to_str(card->monster_type));
 
         for (unsigned int i = 0; i < 4; i++) {
             unsigned int mask = 1u << (3u + i);
@@ -140,7 +134,7 @@ void ygo_card_print(ygo_card_t *card) {
             for (unsigned int i = 0; i < 8; i++) {
                 unsigned int lm = 1u << i;
 
-                if ((unsigned) card->link_markers & lm) {
+                if ((unsigned)card->link_markers & lm) {
                     printf("%s, ", ygo_card_link_markers_to_str(lm));
                 }
             }
