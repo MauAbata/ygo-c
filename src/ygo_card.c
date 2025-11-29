@@ -1,6 +1,8 @@
 #include "ygo_card.h"
 #include "ygo_bin.h"
+#ifdef YGO_ENABLE_PRINT_DEBUG
 #include <stdio.h>
+#endif
 #include <ygo_card.h>
 
 ENUM_IMPL(ygo_card_type, YGO_CARD_TYPE_DEFS);
@@ -88,6 +90,7 @@ size_t ygo_card_deserialize(ygo_card_t *card, const uint8_t *buffer) {
     return ctx.ptr;
 }
 
+#ifdef YGO_ENABLE_PRINT_DEBUG
 void ygo_card_print(ygo_card_t *card) {
     printf("ID: %d\n", card->id);
     printf("Name: %s\n", card->name);
@@ -143,3 +146,4 @@ void ygo_card_print(ygo_card_t *card) {
         }
     }
 }
+#endif // YGO_ENABLE_PRINT_DEBUG
