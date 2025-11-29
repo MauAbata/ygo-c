@@ -1,6 +1,11 @@
 # YGO.c
 
 This is a simple C library that defines the structure of Yu-Gi-Oh! cards and their related data.
+Designed for embedded systems (AVR, ESP32) with compact binary serialization for NFC tag storage.
+
+## Documentation
+
+- **[Card Formats](docs/card_formats.md)** - Binary format specification, magic word detection, and multi-game extensibility
 
 ## Example:
 
