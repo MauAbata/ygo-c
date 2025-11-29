@@ -77,12 +77,15 @@ size_t ygo_card_deserialize(ygo_card_t *card, const uint8_t *buffer) {
     card->summon = GET_SUMMON_TYPE(type0);
     card->monster_type = GET_MONSTER_TYPE(type0);
 
+    // Padding to align Attribute start
+    uint16_t padding = 0x0000;
+    ygo_bin_read_int16(&ctx, &padding);
+
     ygo_bin_read_enum(&ctx, &card->attribute, 1);
     ygo_bin_read_int16(&ctx, &card->atk);
     ygo_bin_read_int16(&ctx, &card->def);
     ygo_bin_read_int8(&ctx, &card->level);
     ygo_bin_read_int8(&ctx, &card->scale);
-    ygo_bin_read_int8(&ctx, &card->link_value);
     ygo_bin_read_enum(&ctx, &card->link_markers, 1);
     ygo_bin_read_str(&ctx, card->name, YGO_CARD_NAME_MAX_LEN);
 
